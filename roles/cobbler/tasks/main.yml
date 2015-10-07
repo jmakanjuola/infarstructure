@@ -1,0 +1,279 @@
+---
+###
+# COBBLER INSTALL
+
+##### Collateral Packages #####
+- name: Cobbler Base | Cobbler Specific Package Install
+  yum: pkg={{ item }} state=installed
+  with_items:
+    - cobbler
+    - cobbler-web
+    - syslinux
+    - koan
+    - dhcp
+    - httpd
+    - bind-utils
+    - bind
+    - cman
+    - fence-agents
+    - sipcalc
+  tags: yum
+
+##### Firewall / IPTABLES Config #####
+- name: iptables | install custom iptables rules
+  template: src=iptables.rules.j2 dest=/tmp/iptables.rules
+  tags: iptables
+
+- name: iptables | load iptables rules via iptables-restore
+  shell: /sbin/iptables-restore < /tmp/iptables.rules
+  tags: iptables
+
+- name: iptables | service save command
+  shell: /etc/init.d/iptables save
+  tags: iptables
+
+- name: iptables | Service is ON and ENABLED
+  service: name=iptables state=running enabled=yes
+  tags: iptables
+
+##### Apache Config #####
+
+# DO SSL CONFIG HERE
+- name: HTTPD | Create Strong Self-Signed Cert
+  command: openssl req -new -nodes -x509 -subj "/C=US/ST=California/L=SC/O=OnCue/CN=`hostname`" -days 3650 -keyout /etc/pki/tls/private/strong-server.key -out /etc/pki/tls/certs/strong-server.crt -extensions v3_ca creates=/etc/pki/tls/certs/strong-server.crt
+  notify: HTTPD Restart
+  tags: 
+    - apache
+    - ssl
+
+- name: Apache | Install Custom Origin Apache Conf
+  template: src=httpd.conf.j2 dest=/etc/httpd/conf/httpd.conf
+  tags: apache
+
+- name: Apache | Install Hardened SSL config
+  template: src=ssl.conf.j2 dest=/etc/httpd/conf.d/ssl.conf
+  notify: HTTPD Restart
+  tags: 
+    - apache
+    - ssl
+
+- name: Apache | Install Blank Index.html
+  template: src=blank.index.html.j2 dest=/var/www/html/index.html
+  tags: apache
+
+- name: Apache | Disable SSL Compression
+  template: src=sysconfig-httpd.j2 dest=/etc/sysconfig/httpd
+  notify: HTTPD Restart
+  tags: apache
+
+##### YUM Mirroring #####
+# TODO: This needs to be though about more, I think.  The first command runs successfully but subsequent commands seem to hang.
+- name: YUM | Sync YUM mirrors
+  shell: cd /var/www/html/; reposync --repoid={{ item }}
+  with_items: repos
+  tags:
+    - yum
+    - reposync
+
+- name: YUM | Run Createrepo
+  shell: createrepo /var/www/html/{{ item }}
+  with_items: repos
+  tags:
+    - yum
+    - reposync
+
+##### Cobbler Configs #####
+- name: Cobbler | Set Settings
+  template: src=settings.j2 dest=/etc/cobbler/settings
+  tags: 
+    - cobbler_update
+    - cobbler_init
+  notify:
+   - Cobbler Sync
+    
+- name: Cobbler | Add modules
+  copy: src=modules.conf dest=/etc/cobbler/modules.conf
+  tags: 
+    - cobbler_init
+
+# The transmitting and setup must be used together    
+- name: Cobbler | Transmit DCHP Info
+  copy: src={{ pod_name }}.json dest=/tmp/dhcp_data.json
+  tags:
+    - cobbler_update
+    - cobbler_init
+
+- name: Cobbler | Setup DHCP
+  script: build_dhcp_file.py
+  tags: 
+    - cobbler_update
+    - cobbler_init
+    
+- name: Cobbler | Setup Zones
+  template: src=zone.template.j2 dest=/etc/cobbler/zone.template
+  tags: cobbler_init
+    
+- name: System Services | Turn on required services
+  service: name={{ item }} state=restarted enabled=yes
+  with_items:
+    - cobblerd
+    - named
+    - httpd
+    - xinetd
+  tags: services
+
+- name: Cobbler | Hard Sync (cannot wait for notify)
+  shell: cobbler sync
+  tags: cobbler_init
+  
+- name: Cobbler | Perform Check   ### Be sure that a failure terminates the script
+  command: cobbler check
+  tags: cobbler_init
+
+##### More system services now that cobbler is done #####
+- name: System Services | Turn on required services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - dhcpd
+  tags: services
+
+##### Cobbler Images, Kickstarts & Snippets #####
+- name: Cobbler Settings | Create /images
+  file: path=/images state=directory
+  tags: cobbler_import
+
+- name: Cobbler Settings | Copy ESXi 5.5 PXE Config
+  template: src=bootcfg_esxi55.template.j2 dest={{ item }}
+  with_items: 
+    - "/etc/cobbler/pxe/bootcfg_esxi55.template"
+    - "/etc/cobbler/pxe/bootcfg_esxi5.template"
+    - "/etc/cobbler/pxe/bootcfg_esxi51.template"
+    - "/etc/cobbler/pxe/bootcfg_esxi60.template"
+  tags:
+    - cobbler_import
+    - cobbler_import_snippet
+
+- name: Cobbler Settings | Download Images
+  get_url: url={{ item.url }} dest={{ item.path }}
+  with_items: linux_isos
+  tags: cobbler_import
+
+- name: Cobbler ISO Import | Create Mount Points
+  file: path=/mnt/{{ item.name }} state=directory
+  with_items: linux_isos
+  tags: cobbler_import
+
+- name: Cobbler ISO Import | Mount ISOs
+  shell: mount -o loop {{ item.path }} /mnt/{{ item.name }} 
+  with_items: linux_isos
+  tags: cobbler_import
+
+- name: Cobbler ISO Import | Import the DVDs into distros
+  shell: cobbler import --name={{ item.name }} --path=/mnt/{{ item.name }}
+  with_items: linux_isos
+  notify: Cobbler Sync
+  tags: cobbler_import 
+
+- name: Cobbler Distro Setup | Setup Kernel Opts
+  shell: cobbler distro edit --name={{ item.name }} --kopts="{{ item.kopts }}" --kopts-post="{{ item.kopts_post }}" 
+  with_items: linux_isos
+  notify: Cobbler Sync
+  tags: cobbler_import 
+  
+- name: Cobbler ISO Import | Unmount ISOs
+  shell: umount /mnt/{{ item.name }} 
+  with_items: linux_isos
+  notify: Cobbler Sync
+  tags: cobbler_import
+
+- name: Cobbler Kickstarts Import | Import Kickstarts
+  copy: src=cobbler_collateral_files/kickstarts/ dest=/var/lib/cobbler/kickstarts/
+  tags: 
+    - cobbler_import
+    - cobbler_import_kickstart
+
+- name: Cobbler Snippets Import | Import Snippets
+  copy: src=cobbler_collateral_files/snippets/ dest=/var/lib/cobbler/snippets/
+  tags:
+    - cobbler_import
+    - cobbler_import_snippet
+
+- name: Cobbler Snippets Import | Import Templatized Snippet for IPMI
+  template: src=post_install_ipmitool_config.j2 dest=/var/lib/cobbler/snippets/post_install_ipmitool_config
+  tags:
+    - cobbler_import
+    - cobbler_import_snippet 
+
+- name: Cobbler Profiles | Create Profile
+  shell: cobbler profile add --name={{ item.name }} --distro={{ item.distro }} --kickstart={{ item.kickstart }}
+  tags: 
+    - cobbler_profile_setup
+  with_items: cobbler_profiles
+  notify: 
+    - Cobbler Sync
+    - XINETD Restart
+
+- name: Cobbler Files Import | Create Directories
+  file: path={{ item }} state=directory
+  with_items:
+    - "/var/www/html/files/"
+    - "/var/www/html/scripts/"
+  tags: 
+    - cobbler_import
+    - cobbler_import_files
+
+- name: Cobbler Files Import | Import Files
+  copy: src=cobbler_collateral_files/files/ dest=/var/www/html/files/
+  tags: 
+    - cobbler_import
+    - cobbler_import_files
+
+- name: Cobbler Scripts Import | Import Scripts
+  copy: src=cobbler_collateral_files/scripts/ dest=/var/www/html/scripts/
+  tags: 
+    - cobbler_import
+    - cobbler_import_files
+
+##### New Cobbler Reposync Scheme #####
+- name: YUM | cobbler repo mirrors
+  shell: cobbler repo add --name {{ item.name }} --mirror-locally=yes --priority=1 --keep-updated=yes --mirror=http://{{ intelmedia_repo }}/cobbler/repo_mirror/{{ item.name }}/ --arch={{ item.arch }}  --breed=wget
+  with_items: repo_sync
+  tags:
+    - yum
+    - cobbler_reposync
+
+- name: YUM | Sync repo mirrors
+  shell: cobbler reposync --only={{ item.name }}
+  with_items: repo_sync
+  tags:
+    - yum
+    - cobbler_reposync
+
+- name: YUM | Run Createrepo on mirrors
+  shell: createrepo /var/www/cobbler/repo_mirror/{{ item.name }}
+  with_items: repo_sync
+  tags:
+    - yum
+    - cobbler_reposync
+
+##### Import System List #####
+#
+# Commented out so that we can use Chuck's CM -> Cobbler script for PODs.
+#
+- name: Cobbler System Import Script
+  copy: src=shell_scripts/ dest=/usr/bin/ mode=0755
+  tags:
+    - cobbler_import
+    - cobbler_system_import
+
+#- name: Cobbler System Import | Copy Input System List
+#  copy: src={{ pod_name }}-servers-all dest=/tmp/
+#  tags:
+#    - cobbler_import
+#    - cobbler_system_import
+
+#- name: Cobbler System Import | Import System List
+#  shell: /usr/bin/add-server-rmm.sh  /tmp/{{ pod_name }}-servers-all
+#  tags: 
+#    - cobbler_import
+#    - cobbler_system_import

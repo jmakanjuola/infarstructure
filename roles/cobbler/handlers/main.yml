@@ -1,0 +1,21 @@
+---
+
+- name: DHCP Start
+  sudo: yes
+  service: name=dhcpd state=restarted
+
+- name: DNS Start
+  sudo: yes
+  service: name=named state=restarted
+
+- name: Cobbler Sync
+  sudo: yes
+  command: cobbler sync
+
+- name: HTTPD Restart
+  sudo: yes
+  service: name=httpd state=restarted 
+
+- name: XINETD Restart
+  sudo: yes
+  service: name=xinetd state=restarted
