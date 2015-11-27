@@ -1,0 +1,16 @@
+{
+    "subnets": [
+        
+        {
+            "subnet-broadcast-IP": "172.16.0.1",
+            "subnet-domain-nameservers": [
+                "172.16.0.21"
+        ],
+        "subnet-mask": "255.255.255.0",
+        "subnet-option-routers 172.16.0.1",
+        "subnet-range 172.16.0.30 172.16.0.50"
+        "next-server 172.16.0.21"
+        },
+    
+     }    
+   

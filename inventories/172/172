@@ -1,0 +1,9 @@
+[cobbler:vars]
+cobbler_repo=192.168.1.21
+cobbler_ip=192.168.1.21
+domain_name=io-cobbler.unixolu.com
+subnet_ip_ranges=192.168.1.0
+root_password_crypted=$1$nwcFlkeL$d840fOIOw8phyuc4R8VIX1
+
+[cobbler]
+192.168.1.21
