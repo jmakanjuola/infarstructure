@@ -40,7 +40,7 @@
 
 # DO SSL CONFIG HERE
 - name: HTTPD | Create Strong Self-Signed Cert
-#  command: openssl req -new -nodes -x509 -subj "/C=US/ST=California/L=SC/O=OnCue/CN=`hostname`" -days 3650 -keyout /etc/pki/tls/private/strong-server.key -out /etc/pki/tls/certs/strong-server.crt -extensions v3_ca creates=/etc/pki/tls/certs/strong-server.crt
+#  command: openssl req -new -nodes -x509 -subj "/C=US/ST=California/L=SC/O=unixolu/CN=`hostname`" -days 3650 -keyout /etc/pki/tls/private/strong-server.key -out /etc/pki/tls/certs/strong-server.crt -extensions v3_ca creates=/etc/pki/tls/certs/strong-server.crt
   notify: HTTPD Restart
   tags: 
     - apache
