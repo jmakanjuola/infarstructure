@@ -1,16 +1,12 @@
-
----
-#Cobbler specific vars (Will change deployment-to-deployment)
-cobbler_repo: 192.168.1.21
-cobbler_ip: 192.168.1.21
-domain_name: io-cobbler.unixolu.com
-subnet_ip_ranges: 192.168.1.0
-root_password_crypted: $1$nwcFlkeL$d840fOIOw8phyuc4R8VIX1
+pod_name: 172
+httpd_version: 2.2.15-30.el6.centos
+admin_network: 192.168.1.0/24
 
 dns_server: 
   - 192.168.1.15
   - 8.8.8.8
-  
 
-search_domain:
-   - unixolu.com
+search_domain: 
+  - unixolu.com
+
+cobbler_repo: 192.168.1.21
