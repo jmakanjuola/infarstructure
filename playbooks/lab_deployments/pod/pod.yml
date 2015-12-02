@@ -3,7 +3,7 @@
 - hosts: all
   roles:
     - server_team_users
-
+    - newrelic
 ##### Production Encoders #####
 #- hosts: pen
 #  roles:
