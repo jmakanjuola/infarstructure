@@ -8,3 +8,8 @@ root_password_crypted=$1$nwcFlkeL$d840fOIOw8phyuc4R8VIX1
 [cobbler]
 192.168.1.21
 
+[dns]
+192.168.1.15
+
+[mo]
+192.168.1.56
