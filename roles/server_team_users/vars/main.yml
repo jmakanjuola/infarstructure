@@ -1,0 +1,3 @@
+--- 
+user_accounts:
+     - { name: 'jay', state: 'present', groups: 'admin' }
