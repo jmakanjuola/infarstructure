@@ -1,0 +1,8 @@
+---
+#gateway_override:192.168.1.1
+routes:
+  eth0:
+    route1:
+      nic: eth0
+      route_destination: 192.168.1.0/24
+      gateway: 192.168.1.1
