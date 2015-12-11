@@ -1,1 +1,0 @@
-- { name: 'makanol', state: 'present', groups: 'lab_servers' }
