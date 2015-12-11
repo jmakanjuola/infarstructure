@@ -7,14 +7,14 @@
 - name: Groups | Create Admin Group
   group: name={{ item.name }} state=present
   with_items:
-    - { name: 'imis_servers' }
+    - { name: 'admin' }
   tags:
     - users
 
 - name: Users | Setup user sudoers.d files
-  template: src=sudoers.d-group.j2 dest=/etc/sudoers.d/{{ item.name }} mode=0440
+  template: src=sudoers.d-group.j2 dest=/etc/sudoers.d/{{ item.name }} mode="0440"
   with_items:
-    - { name: 'imis_servers' }
+    - { name: 'admin' }
   tags: 
     - users
 
