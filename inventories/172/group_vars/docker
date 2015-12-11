@@ -1,0 +1,8 @@
+---
+#gateway_override:172.16.0.33
+routes:
+  eth0:
+    route1:
+      nic: eth0
+      route_destination: 172.16.0.1/24
+      gateway: 172.16.0.0
