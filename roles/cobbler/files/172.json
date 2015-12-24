@@ -2,14 +2,15 @@
     "subnets": [
         
         {
-            "subnet-broadcast-IP": "172.16.0.1",
-            "subnet-domain-nameservers": [
-                "172.16.0.21"
+            "subnet-broadcast-IP": "172.16.0.0",
+            "option_domain_name_servers": [
+                "172.16.0.39"
         ],
-        "subnet-mask": "255.255.255.0",
+        "option_subnet_mask": "255.255.255.0",
         "subnet-option-routers 172.16.0.1",
-        "subnet-range 172.16.0.30 172.16.0.50"
-        "next-server 172.16.0.21"
+        "range_dynamic_bootp 172.16.0.200 172.16.0.254"
+        "dhcp_range 172.16.0.200 172.16.0.254"
+        "option_domain_name_servers 172.16.0.41"
         },
     
      }    
