@@ -2,5 +2,6 @@
 ### Every server gets these ###
 - hosts: all
   roles:
-   - server_team_users
-   - newrelic
+#   - server_team_users
+#   - newrelic
+   - cobbler
