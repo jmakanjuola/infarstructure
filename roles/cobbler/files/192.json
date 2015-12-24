@@ -1,16 +1,18 @@
 {
     "subnets": [
-        
+
         {
             "subnet-broadcast-IP": "192.168.1.0",
-            "subnet-domain-nameservers": [
-                "192.168.1.21"
+            "option_domain_name_servers": [
+                "192.168.1.35"
         ],
-        "subnet-mask": "255.255.255.0",
+        "option_subnet_mask": "255.255.255.0",
         "subnet-option-routers 192.168.1.1",
-        "subnet-range 192.168.1.30 192.168.1.50"
-        "next-server 192.168.1.21"
+        "range_dynamic_bootp 192.168.1.200 192.168.1.254"
+        "dhcp_range 192.168.1.200 192.168.1.254"
+        "option_domain_name_servers 192.168.1.56"
         },
-    
-     }    
+
+     }
+
    
