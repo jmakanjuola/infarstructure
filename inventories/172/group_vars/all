@@ -1,12 +1,12 @@
 pod_name: 172
-httpd_version: 2.2.15-30.el6.centos
+httpd_version: 2.4.6-40.el7.centos
 admin_network: 172.16.0.0/24
 
 dns_server: 
-  - 192.168.1.15
+  - 172.16.0.1
   - 8.8.8.8
 
 search_domain: 
   - unixolu.com
 
-cobbler_repo: 192.168.1.21
+cobbler_repo: 172.16.0.39
