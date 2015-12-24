@@ -1,10 +1,13 @@
 
 ---
 #Cobbler specific vars (Will change deployment-to-deployment)
-cobbler_repo: 192.168.1.21
-cobbler_ip: 192.168.1.21
-domain_name: io-cobbler.unixolu.com
+cobbler_repo: 192.168.1.56
+cobbler_ip: 192.168.1.56
+option_domain_name_servers: mo.unixolu.com
+option_subnet_mask: 255.255.255.0
 subnet_ip_ranges: 192.168.1.0
+range_dynamic_bootp: 192.168.1.200 192.168.1.254
+dhcp_range: 192.168.1.200 192.168.1.254
 root_password_crypted: $1$nwcFlkeL$d840fOIOw8phyuc4R8VIX1
 
 dns_server: 
