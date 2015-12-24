@@ -19,3 +19,9 @@
 - name: XINETD Restart
   sudo: yes
   service: name=xinetd state=restarted
+
+- name: make sure firewalld is not running
+  service: name=firewalld state=stopped
+
+- name: make sure cobbler is running
+  service: name=cobblerd state=restarted
