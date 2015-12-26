@@ -9,4 +9,4 @@ dns_server:
 search_domain: 
   - unixolu.com
 
-cobbler_repo: 172.16.0.39
+cobbler_repo: 172.16.0.41
