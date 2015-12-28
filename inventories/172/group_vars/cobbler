@@ -1,7 +1,7 @@
 ---
 #Cobbler specific vars (Will change deployment-to-deployment)
-cobbler_repo: 172.16.0.39
-cobbler_ip: 172.16.0.39
+cobbler_repo: 172.16.0.40
+cobbler_ip: 172.16.0.40
 option_domain_name_servers: cob.unixolu.com
 option_subnet_mask: 255.255.255.0
 subnet_ip_ranges: 172.16.0.0
