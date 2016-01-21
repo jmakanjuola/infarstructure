@@ -2,6 +2,6 @@
 ### Every server gets these ###
 - hosts: all
   roles:
-#   - server_team_users
-#   - newrelic
    - cobbler
+   - {role: newrelic, newrelic_licence_key: a3aed10cd3ff3700ce543103e5f63ef15fcd7d5b }
+   - vmware_tools
