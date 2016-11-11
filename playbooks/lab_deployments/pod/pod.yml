@@ -4,29 +4,8 @@
   roles:
     - server_team_users
     - newrelic
-##### Production Encoders #####
-#- hosts: pen
-#  roles:
-#    - encoder
-#    - network_overrides
-
-##### Production Streamers #####
-#- hosts: streamer
-#  roles:
-#    - encompass_streamer
-#    - squid
-
-##### Production Tools #####
-#- hosts: bastion
-#  roles:
-#    - network_team_users
-#    - fe_team_users
-#    - bastion
 
 - hosts: cobbler
   roles:
     - cobbler
 
-#- hosts: keyproxy
-#  roles:
-#    - keyproxy
